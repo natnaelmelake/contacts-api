@@ -79,9 +79,13 @@ WSGI_APPLICATION = 'contact_api.wsgi.application'
 
 DATABASES = {
     "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL"),  # Render sets DATABASE_URL in env vars
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600
     )
+    # "default": dj_database_url.config(
+    #     default=os.environ.get("DATABASE_URL"),  # Render sets DATABASE_URL in env vars
+    #     conn_max_age=600
+    # )
 }
 
 
