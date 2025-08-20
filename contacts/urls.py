@@ -9,5 +9,7 @@ urlpatterns = [
     # path('contact-detail/<int:pk>/',views.contact_detail,name='contact-detail'),
     path('contact-list/',views.ContactListView.as_view(),name='contact-list'),
     path('contact-detail/<int:pk>/',views.ContactDetailView.as_view(),name='contact-detail'),
+    path('register/', views.RegisterView.as_view(), name="register"),
+    
 
 ]
