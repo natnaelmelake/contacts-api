@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 import dj_database_url
+from dotenv import load_dotenv
+
+load_dotenv()  # load .env file
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -79,8 +82,9 @@ WSGI_APPLICATION = 'contact_api.wsgi.application'
 
 DATABASES = {
     "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600
+        default='sqlite:///db.sqlite3',  # fallback for local dev
+        conn_max_age=600,
+        ssl_require=False
     )
     # "default": dj_database_url.config(
     #     default=os.environ.get("DATABASE_URL"),  # Render sets DATABASE_URL in env vars

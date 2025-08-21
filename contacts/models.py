@@ -13,7 +13,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 class Contact(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="contacts")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="contacts",null=True, blank=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     phone = models.CharField(max_length=20)
