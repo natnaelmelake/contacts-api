@@ -45,50 +45,85 @@ def contact_view(request):
     return HttpResponse('welcome')
 
 
-@api_view(['GET','POST'])
-def contact_list(request):
-    if request.method == 'GET':
-        contacts = Contact.objects.all()
-        serializer = ContactSerializer(contacts,many=True)
-        return Response(serializer.data)
+# @api_view(['GET','POST'])
+# def contact_list(request):
+#     if request.method == 'GET':
+#         contacts = Contact.objects.all()
+#         serializer = ContactSerializer(contacts,many=True)
+#         return Response(serializer.data)
 
-    elif request.method == 'POST':
-        serializer = ContactSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data,status=status.HTTP_201_CREATED)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+#     elif request.method == 'POST':
+#         serializer = ContactSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data,status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET','PUT','Delete'])
-def contact_detail(request,pk):
+# @api_view(['GET','PUT','Delete'])
+# def contact_detail(request,pk):
 
-    try:
-        contact = Contact.objects.get(pk=pk)
-    except Contact.DoesNotExist:
-        return Response({"error": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+#     try:
+#         contact = Contact.objects.get(pk=pk)
+#     except Contact.DoesNotExist:
+#         return Response({"error": "Not found"}, status=status.HTTP_404_NOT_FOUND)
     
-    if request.method == 'GET':
-        serializer = ContactSerializer(contact)
-        return Response(serializer.data,status=status.HTTP_200_OK)
-    elif request.method == 'PUT':
-        serializer = ContactSerializer(contact,data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-    elif request.method == 'Delete':
-        contact.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+#     if request.method == 'GET':
+#         serializer = ContactSerializer(contact)
+#         return Response(serializer.data,status=status.HTTP_200_OK)
+#     elif request.method == 'PUT':
+#         serializer = ContactSerializer(contact,data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data)
+#         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+#     elif request.method == 'Delete':
+#         contact.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
         
 
 
-class ContactListView(generics.ListCreateAPIView):
-    queryset = Contact.objects.all()
-    serializer_class = ContactSerializer
-    permission_classes = [permissions.IsAuthenticated]
+# class ContactListView(generics.ListCreateAPIView):
+#     queryset = Contact.objects.all()
+#     serializer_class = ContactSerializer
+#     permission_classes = [permissions.IsAuthenticated]
 
-class ContactDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Contact.objects.all()
+# class ContactDetailView(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = Contact.objects.all()
+#     serializer_class = ContactSerializer
+#     permission_classes = [permissions.IsAuthenticated]
+
+
+
+
+
+from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
+from .models import Contact
+from .serializers import ContactSerializer
+from .permissions import IsOwner  # import custom permission
+
+# List & create contacts
+class ContactListView(generics.ListCreateAPIView):
     serializer_class = ContactSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Only return contacts owned by the logged-in user
+        return Contact.objects.filter(owner=self.request.user)
+
+    def perform_create(self, serializer):
+        # Set the owner to the logged-in user
+        serializer.save(owner=self.request.user)
+
+# Retrieve, update, delete a single contact
+class ContactDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = ContactSerializer
+    permission_classes = [IsAuthenticated, IsOwner]  # enforce object-level authorization
+
+    def get_queryset(self):
+        # Only allow access to contacts owned by the logged-in user
+        return Contact.objects.filter(owner=self.request.user)
+
+
+
